@@ -1,14 +1,59 @@
 <script setup lang="ts">
 import WelcomeItem from './WelcomeItem.vue'
-import DocumentationIcon from './icons/IconDocumentation.vue'
-import ToolingIcon from './icons/IconTooling.vue'
-import EcosystemIcon from './icons/IconEcosystem.vue'
-import CommunityIcon from './icons/IconCommunity.vue'
-import SupportIcon from './icons/IconSupport.vue'
+// import ToolingIcon from './icons/IconTooling.vue'
+// import EcosystemIcon from './icons/IconEcosystem.vue'
+// import CommunityIcon from './icons/IconCommunity.vue'
+// import SupportIcon from './icons/IconSupport.vue'
+
+import { directus } from '@/services/directus'
+import { onMounted, ref } from 'vue'
+
+const obj = ref()
+
+async function fetchData() {
+  try {
+    const data = await directus.items('test1').readByQuery({
+      fields: ['*.*'],
+    })
+    obj.value = data.data
+    console.log(obj.value)
+    // for (const item in obj) {
+    //       console.log(item.icon)
+    // }
+  } catch (error) {
+    console.error(error)
+  }
+}
+onMounted(async () => {
+  try {
+    await fetchData()
+  } catch (error) {
+    console.error(error)
+  }
+})
 </script>
 
 <template>
-  <WelcomeItem>
+  <div v-for="item in obj" :key="item.id">
+    <WelcomeItem>
+      <template #icon>
+          <svg
+           :xmlns="item.icon[0].xmlns"
+           :width="item.icon[0].width"
+           :height="item.icon[0].height"
+           fill="currentColor">
+            <path
+              :d="item.icon[0].path"
+            />
+          </svg>
+      </template>
+      <template #heading>{{ item.topic }}</template>
+      <p>{{ item.content }}</p>
+    </WelcomeItem>
+  </div>
+</template>
+<!-- </div> -->
+<!-- <WelcomeItem>
     <template #icon>
       <DocumentationIcon />
     </template>
@@ -86,5 +131,4 @@ import SupportIcon from './icons/IconSupport.vue'
     As an independent project, Vue relies on community backing for its sustainability. You can help
     us by
     <a href="https://vuejs.org/sponsor/" target="_blank" rel="noopener">becoming a sponsor</a>.
-  </WelcomeItem>
-</template>
+  </WelcomeItem> -->
